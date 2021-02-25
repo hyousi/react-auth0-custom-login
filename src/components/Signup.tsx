@@ -14,21 +14,22 @@ export default function Signup() {
 
   async function handleSubmit(e: any) {
     e.preventDefault();
-
+  
     if (passwordConfirm !== password) {
       return setError("Passwords do not match");
     }
 
-    try {
-      setError("");
-      setLoading(true);
-      await signup(email, password);
-      history.push("/");
-    } catch {
-      setError("Failed to create an account");
-    }
-
-    setLoading(false);
+    setLoading(true);
+    signup(email, password)
+    .then((authResult) => console.log(authResult))
+    .then(() => {
+      setError('');
+      setLoading(false);
+    })
+    .catch((err: Error) => {
+      setError(err.message);
+      setLoading(false);
+    });
   }
 
   return (

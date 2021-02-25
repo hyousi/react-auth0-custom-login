@@ -20,7 +20,6 @@ export default function Login() {
       .then(() => {
         setError('');
         setLoading(false);
-        history.push('/');
       })
       .catch((err: Error) => {
         setError(err.message);

@@ -1,10 +1,11 @@
-import React, { createContext, useContext, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { AuthOptions, WebAuth } from 'auth0-js';
 import { useHistory } from 'react-router-dom';
 
 interface AuthContextProps {
   isAuthenticated: boolean;
   loading: boolean;
+  authResult: any;
   login: (username: string, password: string) => Promise<any>;
   signup: (username: string, password: string) => Promise<any>;
 }
@@ -12,6 +13,7 @@ interface AuthContextProps {
 const initialAuthState: AuthContextProps = {
   isAuthenticated: false,
   loading: false,
+  authResult: null,
   login: () => new Promise((resolve) => resolve(null)),
   signup: () => new Promise((resolve) => resolve(null)),
 };
@@ -22,10 +24,12 @@ export function useAuth() {
   return useContext(AuthContext);
 }
 
+/** refactor useState to useReducer! */
 export function AuthProvider(props: React.PropsWithChildren<AuthOptions>) {
   const { children, ...options } = props;
   const webAuth = new WebAuth(options);
   const history = useHistory();
+  const [authResult, setAuthResult] = useState({});
 
   /* add auth0 callback listener to parse & store auth0 response. */
   useEffect(() => {
@@ -36,7 +40,8 @@ export function AuthProvider(props: React.PropsWithChildren<AuthOptions>) {
       if (result) {
         console.log('on parseHash');
         console.log(result);
-        history.replace('/');
+        setAuthResult(result);
+        history.push('/');
       }
     });
   }, []);
@@ -55,13 +60,22 @@ export function AuthProvider(props: React.PropsWithChildren<AuthOptions>) {
   }
 
   function signup(email: string, password: string) {
-    return Promise.resolve("success");
+    return new Promise((resolve, reject) => {
+      webAuth.signup({email, password, connection: "Username-Password-Authentication"}, (error) => {
+        if (error) {
+          reject(new Error(error.error_description));
+        } else {
+          return login(email, password);
+        }
+      })
+    })
   }
 
   return (
     <AuthContext.Provider
       value={{
         ...initialAuthState,
+        authResult,
         login,
         signup
       }}

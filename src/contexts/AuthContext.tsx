@@ -26,7 +26,7 @@ export function useAuth() {
   return useContext(AuthContext);
 }
 
-/** refactor useState to useReducer! */
+/** TODO: refactor useState to useReducer! */
 export function AuthProvider(props: React.PropsWithChildren<AuthOptions>) {
   const { children, ...options } = props;
   const webAuth = new WebAuth(options);
@@ -51,7 +51,7 @@ export function AuthProvider(props: React.PropsWithChildren<AuthOptions>) {
   }, []);
 
   function login(email: string, password: string) {
-    // TODO: webAuth.logout will make a GET /logout call to auth0 and then get a 302 response. 
+    // TODO: webAuth.logout will make a GET /login call to auth0 and then get a 302 response.
     return new Promise((resolve, reject) => {
       webAuth.login({ email, password }, (err, authResult) => {
         if (err) {
@@ -68,7 +68,7 @@ export function AuthProvider(props: React.PropsWithChildren<AuthOptions>) {
     return new Promise((resolve, reject) => {
       webAuth.signup({email, password, connection: "Username-Password-Authentication"}, (error) => {
         if (error) {
-          reject(new Error(error.error_description));
+          reject(new Error(error.description));
         } else {
           return login(email, password);
         }
@@ -77,7 +77,7 @@ export function AuthProvider(props: React.PropsWithChildren<AuthOptions>) {
   }
 
   function logout() {
-      // TODO: webAuth.logout will make a GET /logout call to auth0 and then get a 302 response. 
+      // TODO: webAuth.logout will make a GET /logout call to auth0 and then get a 302 response.
       return webAuth.logout({ returnTo: window.location.origin })
   }
 

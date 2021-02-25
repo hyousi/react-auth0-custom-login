@@ -6,12 +6,14 @@ interface AuthContextProps {
   isAuthenticated: boolean;
   loading: boolean;
   login: (username: string, password: string) => Promise<any>;
+  signup: (username: string, password: string) => Promise<any>;
 }
 
 const initialAuthState: AuthContextProps = {
   isAuthenticated: false,
   loading: false,
   login: () => new Promise((resolve) => resolve(null)),
+  signup: () => new Promise((resolve) => resolve(null)),
 };
 
 const AuthContext = createContext<AuthContextProps>(initialAuthState);
@@ -22,7 +24,7 @@ export function useAuth() {
 
 export function AuthProvider(props: React.PropsWithChildren<AuthOptions>) {
   const { children, ...options } = props;
-  const webAuth = useMemo(() => new WebAuth(options), [options]);
+  const webAuth = new WebAuth(options);
   const history = useHistory();
 
   /* add auth0 callback listener to parse & store auth0 response. */
@@ -52,12 +54,18 @@ export function AuthProvider(props: React.PropsWithChildren<AuthOptions>) {
     });
   }
 
+  function signup(email: string, password: string) {
+    return Promise.resolve("success");
+  }
+
   return (
     <AuthContext.Provider
       value={{
         ...initialAuthState,
         login,
-      }}>
+        signup
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
